@@ -52,6 +52,15 @@ void cg::renderer::rasterization_renderer::render()
 		return std::make_pair(processed, vertex_data);
 	};
 
+	// TODO Lab: 1.05 Implement `pixel_shader` lambda for the instance of `cg::renderer::rasterizer`
+	rasterizer->pixel_shader = [](cg::vertex vertex_data, float z) {
+		return cg::color{
+				vertex_data.ambient_r,
+				vertex_data.ambient_g,
+				vertex_data.ambient_b,
+		};
+	};
+
 	for (size_t shape_id = 0; shape_id < model->get_index_buffers().size(); shape_id++)
 	{
 		rasterizer->set_vertex_buffer(model->get_vertex_buffers()[shape_id]);
@@ -65,7 +74,6 @@ void cg::renderer::rasterization_renderer::render()
 
 	cg::utils::save_resource(*render_target, settings->result_path);
 
-	// TODO Lab: 1.05 Implement `pixel_shader` lambda for the instance of `cg::renderer::rasterizer`
 	// TODO Lab: 1.03 Adjust `cg::renderer::rasterization_renderer` class to consume `cg::world::model`
 }
 
