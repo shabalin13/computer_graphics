@@ -152,12 +152,14 @@ namespace cg::renderer
 	inline void raytracer<VB, RT>::set_vertex_buffers(std::vector<std::shared_ptr<cg::resource<VB>>> in_vertex_buffers)
 	{
 		// TODO Lab: 2.02 Implement `set_vertex_buffers` and `set_index_buffers` of `raytracer` class
+		vertex_buffers = in_vertex_buffers;
 	}
 
 	template<typename VB, typename RT>
 	void raytracer<VB, RT>::set_index_buffers(std::vector<std::shared_ptr<cg::resource<unsigned int>>> in_index_buffers)
 	{
 		// TODO Lab: 2.02 Implement `set_vertex_buffers` and `set_index_buffers` of `raytracer` class
+		index_buffers = in_index_buffers;
 	}
 
 	template<typename VB, typename RT>
