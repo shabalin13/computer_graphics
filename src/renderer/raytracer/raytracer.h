@@ -180,21 +180,23 @@ namespace cg::renderer
 	inline void raytracer<VB, RT>::build_acceleration_structure()
 	{
 		// TODO Lab: 2.02 Fill `triangles` vector in `build_acceleration_structure` of `raytracer` class
+		// TODO Lab: 2.05 Implement `build_acceleration_structure` method of `raytracer` class
 		for (size_t shape_id = 0; shape_id < index_buffers.size(); shape_id++)
 		{
 			auto& index_buffer = index_buffers[shape_id];
 			auto vertex_buffer = vertex_buffers[shape_id];
 			size_t index_id = 0;
+			aabb<VB> aabb;
 			while (index_id < index_buffer->get_number_of_elements())
 			{
 				triangle<VB> triangle(
 						vertex_buffer->item(index_buffer->item(index_id++)),
 						vertex_buffer->item(index_buffer->item(index_id++)),
 						vertex_buffer->item(index_buffer->item(index_id++)));
-				triangles.push_back(triangle);
+				aabb.add_triangle(triangle);
 			}
+			acceleration_structures.push_back(aabb);
 		}
-		// TODO Lab: 2.05 Implement `build_acceleration_structure` method of `raytracer` class
 	}
 
 	template<typename VB, typename RT>
@@ -205,7 +207,7 @@ namespace cg::renderer
 		// TODO Lab: 2.01 Implement `ray_generation` and `trace_ray` method of `raytracer` class
 		for (int x = 0; x < width; x++)
 		{
-//#pragma omp parallel for
+			//#pragma omp parallel for
 			for (int y = 0; y < height; y++)
 			{
 				float u = (2.f * x) / static_cast<float>(width - 1) - 1.f;
@@ -235,16 +237,22 @@ namespace cg::renderer
 		closest_hit_payload.t = max_t;
 		const triangle<VB>* closest_triangle = nullptr;
 
-		for (auto& triangle: triangles)
+		// TODO Lab: 2.05 Adjust `trace_ray` method of `raytracer` class to traverse the acceleration structure
+		for (auto& aabb: acceleration_structures)
 		{
-			payload payload = intersection_shader(triangle, ray);
-			if (payload.t > min_t && payload.t < closest_hit_payload.t)
+			if (!aabb.aabb_test(ray))
+				continue;
+			for (auto& triangle: aabb.get_triangles())
 			{
-				closest_hit_payload = payload;
-				closest_triangle = &triangle;
-				// TODO Lab: 2.04 Adjust `trace_ray` method of `raytracer` to use `any_hit_shader`
-				if (any_hit_shader)
-					return any_hit_shader(ray, payload, triangle);
+				payload payload = intersection_shader(triangle, ray);
+				if (payload.t > min_t && payload.t < closest_hit_payload.t)
+				{
+					closest_hit_payload = payload;
+					closest_triangle = &triangle;
+					// TODO Lab: 2.04 Adjust `trace_ray` method of `raytracer` to use `any_hit_shader`
+					if (any_hit_shader)
+						return any_hit_shader(ray, payload, triangle);
+				}
 			}
 		}
 
@@ -253,7 +261,6 @@ namespace cg::renderer
 			if (closest_hit_shader)
 				return closest_hit_shader(ray, closest_hit_payload, *closest_triangle, depth);
 		}
-		// TODO Lab: 2.05 Adjust `trace_ray` method of `raytracer` class to traverse the acceleration structure
 		return miss_shader(ray);
 	}
 
@@ -309,7 +316,6 @@ namespace cg::renderer
 		aabb_min = min(aabb_min, triangle.a);
 		aabb_min = min(aabb_min, triangle.b);
 		aabb_min = min(aabb_min, triangle.c);
-
 	}
 
 	template<typename VB>
