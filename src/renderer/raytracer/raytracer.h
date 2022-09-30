@@ -191,7 +191,7 @@ namespace cg::renderer
 		// TODO Lab: 2.01 Implement `ray_generation` and `trace_ray` method of `raytracer` class
 		for (int x = 0; x < width; x++)
 		{
-//#pragma omp parallel for
+			//#pragma omp parallel for
 			for (int y = 0; y < height; y++)
 			{
 				float u = (2.f * x) / static_cast<float>(width - 1) - 1.f;
@@ -215,7 +215,28 @@ namespace cg::renderer
 		if (depth == 0)
 			return miss_shader(ray);
 		depth--;
+
 		// TODO Lab: 2.02 Adjust `trace_ray` method of `raytracer` class to traverse geometry and call a closest hit shader
+		payload closest_hit_payload{};
+		closest_hit_payload.t = max_t;
+		const triangle<VB>* closest_triangle = nullptr;
+
+		for (auto& triangle: triangles)
+		{
+			payload payload = intersection_shader(triangle, ray);
+			if (payload.t > min_t && payload.t < closest_hit_payload.t)
+			{
+				closest_hit_payload = payload;
+				closest_triangle = &triangle;
+			}
+		}
+
+		if (closest_hit_payload.t < max_t)
+		{
+			if (closest_hit_shader)
+				return closest_hit_shader(ray, closest_hit_payload, *closest_triangle, depth);
+		}
+
 		// TODO Lab: 2.04 Adjust `trace_ray` method of `raytracer` to use `any_hit_shader`
 		// TODO Lab: 2.05 Adjust `trace_ray` method of `raytracer` class to traverse the acceleration structure
 		return miss_shader(ray);
@@ -236,17 +257,17 @@ namespace cg::renderer
 		float inv_det = 1.f / det;
 
 		float3 tvec = ray.position - triangle.a;
-		float u = dot(tvec, pvec)* inv_det;
+		float u = dot(tvec, pvec) * inv_det;
 		if (u < 0.f || u > 1.f)
 			return payload;
 
 		float3 qvec = cross(tvec, triangle.ba);
 		float v = dot(ray.direction, qvec) * inv_det;
-		if (v < 0.f | u + v > 1.f)
+		if (v<0.f | u + v> 1.f)
 			return payload;
 
 		payload.t = dot(triangle.ca, qvec) * inv_det;
-		payload.bary = float3{1.f - u - v, u , v};
+		payload.bary = float3{1.f - u - v, u, v};
 		return payload;
 	}
 
