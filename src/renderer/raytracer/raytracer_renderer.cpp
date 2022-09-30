@@ -65,7 +65,7 @@ void cg::renderer::ray_tracing_renderer::render()
 
 	auto stop = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<float, std::milli> raytracing_duration = stop - start;
-	std::cout << "Raytracing took" << raytracing_duration.count() << "ms\n";
+	std::cout << "Raytracing took " << raytracing_duration.count() << " ms\n";
 
 	cg::utils::save_resource(*render_target, settings->result_path);
 	// TODO Lab: 2.02 Add `closest_hit_shader` to `raytracer` class to return diffuse color
