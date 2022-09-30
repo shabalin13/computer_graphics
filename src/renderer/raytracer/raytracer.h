@@ -175,6 +175,7 @@ namespace cg::renderer
 		// TODO Lab: 2.01 Implement `ray_generation` and `trace_ray` method of `raytracer` class
 		for (int x = 0; x < width; x++)
 		{
+//#pragma omp parallel for
 			for (int y = 0; x < height; y++)
 			{
 				float u = (2.f * x) / static_cast<float>(width - 1) - 1.f;
@@ -184,7 +185,7 @@ namespace cg::renderer
 				ray ray(position, ray_direction);
 
 				payload payload = trace_ray(ray, depth);
-				render_target->item(x, y) = payload.color;
+				render_target->item(x, y) = unsigned_color::from_color(payload.color);
 			}
 		}
 		// TODO Lab: 2.06 Implement TAA in `ray_generation` method of `raytracer` class
