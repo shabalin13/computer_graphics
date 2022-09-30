@@ -71,8 +71,18 @@ void cg::renderer::ray_tracing_renderer::render()
 		float3 result_color = triangle.emissive;
 		for (auto& light: lights)
 		{
+			// TODO Lab: 2.04 Adjust `closest_hit_shader` of `raytracer` to cast shadows rays and to ignore occluded lights
 			cg::renderer::ray to_light(position, light.position - position);
-			result_color += triangle.diffuse * light.color * std::max(dot(normal, to_light.direction), 0.f);
+			auto shadow_payload = shadow_raytracer->trace_ray(
+					to_light, 1,
+					length(light.position - position));
+			if (shadow_payload.t < 0.f)
+			{
+				result_color += triangle.diffuse *
+								light.color *
+								std::max(dot(normal, to_light.direction), 0.f);
+
+			}
 		}
 		payload.color = cg::color::from_float3(result_color);
 		return payload;
@@ -107,7 +117,7 @@ void cg::renderer::ray_tracing_renderer::render()
 	std::cout << "Raytracing took " << raytracing_duration.count() << " ms\n";
 
 	cg::utils::save_resource(*render_target, settings->result_path);
-	// TODO Lab: 2.04 Adjust `closest_hit_shader` of `raytracer` to cast shadows rays and to ignore occluded lights
+
 	// TODO Lab: 2.05 Adjust `ray_tracing_renderer` class to build the acceleration structure
 	// TODO Lab: 2.06 (Bonus) Adjust `closest_hit_shader` for Monte-Carlo light tracing
 }
