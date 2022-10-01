@@ -215,7 +215,6 @@ namespace cg::renderer
 			std::cout << "Tracing frame #" << frame_id + 1 << "\n";
 			float2 jitter = get_jitter(frame_id);
 			for (int x = 0; x < width; x++)
-			{
 				//#pragma omp parallel for
 				for (int y = 0; y < height; y++)
 				{
@@ -228,14 +227,14 @@ namespace cg::renderer
 					payload payload = trace_ray(ray, depth);
 
 					auto& history_pixel = history->item(x, y);
-					history_pixel += (float3{
+					history_pixel += sqrt(float3{
 							payload.color.r,
 							payload.color.g,
 							payload.color.b,
 					} * frame_weight);
-					render_target->item(x, y) = RT::from_float3(history_pixel);
+					if (frame_id == accumulation_num - 1)
+						render_target->item(x, y) = RT::from_float3(history_pixel);
 				}
-			}
 		}
 	}
 
