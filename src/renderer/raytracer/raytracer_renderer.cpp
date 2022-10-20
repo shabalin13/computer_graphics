@@ -71,7 +71,6 @@ void cg::renderer::ray_tracing_renderer::render()
 				payload.bary.z * triangle.nc);
 
 		float3 result_color = triangle.emissive;
-		{
 			float3 random_direction{
 					uniform_distribution(random_generator),
 					uniform_distribution(random_generator),
@@ -85,7 +84,6 @@ void cg::renderer::ray_tracing_renderer::render()
 			result_color += triangle.diffuse *
 							payload_next.color.to_float3() *
 							std::max(dot(normal, to_next_object.direction), 0.f);
-		}
 		payload.color = cg::color::from_float3(result_color);
 		return payload;
 	};
