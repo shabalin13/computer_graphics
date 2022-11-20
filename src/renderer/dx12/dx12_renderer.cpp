@@ -134,17 +134,15 @@ void cg::renderer::dx12_renderer::create_render_target_views()
 	rtv_heap.create_heap(
 			device,
 			D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
-			frame_number
-			);
+			frame_number);
 	// TODO Lab: 3.04 Create render target views
-	for (UINT i=0; i < frame_number; i++)
+	for (UINT i = 0; i < frame_number; i++)
 	{
 		THROW_IF_FAILED(swap_chain->GetBuffer(i, IID_PPV_ARGS(&render_targets[i])));
 		device->CreateRenderTargetView(
 				render_targets[i].Get(),
 				nullptr,
-				rtv_heap.get_cpu_descriptor_handle(i)
-				);
+				rtv_heap.get_cpu_descriptor_handle(i));
 		std::wstring name(L"Render target ");
 		name += std::to_wstring(i);
 		render_targets[i]->SetName(name.c_str());
@@ -269,6 +267,11 @@ void cg::renderer::dx12_renderer::load_assets()
 	// TODO Lab: 3.06 Create command allocators and a command list
 
 	// TODO Lab: 3.04 Create a descriptor heap for a constant buffer
+	cbv_srv_heap.create_heap(
+			device,
+			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			1,
+			D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
 	// TODO Lab: 3.03 Allocate memory for vertex and index buffers
 	// TODO Lab: 3.03 Copy resource data to suitable resources
@@ -363,8 +366,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE cg::renderer::descriptor_heap::get_cpu_descriptor_ha
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			heap->GetCPUDescriptorHandleForHeapStart(),
 			static_cast<INT>(index),
-			descriptor_size
-			);
+			descriptor_size);
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE cg::renderer::descriptor_heap::get_gpu_descriptor_handle(UINT index) const
@@ -373,8 +375,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE cg::renderer::descriptor_heap::get_gpu_descriptor_ha
 	return CD3DX12_GPU_DESCRIPTOR_HANDLE(
 			heap->GetGPUDescriptorHandleForHeapStart(),
 			static_cast<INT>(index),
-			descriptor_size
-	);
+			descriptor_size);
 }
 ID3D12DescriptorHeap* cg::renderer::descriptor_heap::get() const
 {
