@@ -22,8 +22,7 @@ void cg::renderer::dx12_renderer::init()
 			float3{
 					settings->camera_position[0],
 					settings->camera_position[1],
-					settings->camera_position[2]
-			});
+					settings->camera_position[2]});
 	camera->set_phi(settings->camera_phi);
 	camera->set_theta(settings->camera_theta);
 	camera->set_angle_of_view(settings->camera_angle_of_view);
@@ -86,8 +85,8 @@ void cg::renderer::dx12_renderer::initialize_device(ComPtr<IDXGIFactory4>& dxgi_
 
 	// TODO Lab: 3.02 Create a device object
 	THROW_IF_FAILED(D3D12CreateDevice(hardware_adapter.Get(),
-					  D3D_FEATURE_LEVEL_11_0,
-					  IID_PPV_ARGS(&device)));
+									  D3D_FEATURE_LEVEL_11_0,
+									  IID_PPV_ARGS(&device)));
 }
 
 void cg::renderer::dx12_renderer::create_direct_command_queue()
@@ -119,13 +118,11 @@ void cg::renderer::dx12_renderer::create_swap_chain(ComPtr<IDXGIFactory4>& dxgi_
 			&swap_chain_desc,
 			nullptr,
 			nullptr,
-			&temp_swap_chain
-			));
+			&temp_swap_chain));
 
 	dxgi_factory->MakeWindowAssociation(
 			cg::utils::window::get_hwnd(),
-			DXGI_MWA_NO_ALT_ENTER
-			);
+			DXGI_MWA_NO_ALT_ENTER);
 
 	temp_swap_chain.As(&swap_chain);
 	frame_index = swap_chain->GetCurrentBackBufferIndex();
@@ -194,6 +191,17 @@ void cg::renderer::dx12_renderer::create_pso(const std::string& shader_name)
 void cg::renderer::dx12_renderer::create_resource_on_upload_heap(ComPtr<ID3D12Resource>& resource, UINT size, const std::wstring& name)
 {
 	// TODO Lab: 3.03 Implement resource creation on upload heap
+	THROW_IF_FAILED(device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(size),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&resource)));
+	if (!name.empty())
+	{
+		resource->SetName(name.c_str());
+	}
 }
 
 void cg::renderer::dx12_renderer::create_resource_on_default_heap(ComPtr<ID3D12Resource>& resource, UINT size, const std::wstring& name, D3D12_RESOURCE_DESC* resource_descriptor)
