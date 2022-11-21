@@ -531,7 +531,7 @@ void cg::renderer::dx12_renderer::populate_command_list()
 			0,
 			nullptr);
 
-	for (size_t s = 0; s < model->get_vertex_buffers().size(); i++)
+	for (size_t s = 0; s < model->get_vertex_buffers().size(); s++)
 	{
 		command_list->IASetVertexBuffers(0, 1, &vertex_buffer_views[s]);
 		command_list->IASetIndexBuffer(&index_buffer_views[s]);
