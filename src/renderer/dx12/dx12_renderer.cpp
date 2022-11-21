@@ -242,7 +242,11 @@ void cg::renderer::dx12_renderer::copy_data(const void* buffer_data, const UINT 
 D3D12_VERTEX_BUFFER_VIEW cg::renderer::dx12_renderer::create_vertex_buffer_view(const ComPtr<ID3D12Resource>& vertex_buffer, const UINT vertex_buffer_size)
 {
 	// TODO Lab: 3.04 Create vertex buffer views
-	return D3D12_VERTEX_BUFFER_VIEW{};
+	D3D12_VERTEX_BUFFER_VIEW view{};
+	view.BufferLocation = vertex_buffer->GetGPUVirtualAddress();
+	view.StrideInBytes = sizeof(vertex);
+	view.SizeInBytes = vertex_buffer_size;
+	return view;
 }
 
 D3D12_INDEX_BUFFER_VIEW cg::renderer::dx12_renderer::create_index_buffer_view(const ComPtr<ID3D12Resource>& index_buffer, const UINT index_buffer_size)
@@ -281,7 +285,9 @@ void cg::renderer::dx12_renderer::load_assets()
 	// TODO Lab: 3.03 Allocate memory for vertex and index buffers
 	// TODO Lab: 3.03 Copy resource data to suitable resources
 	vertex_buffers.resize(model->get_vertex_buffers().size());
+	vertex_buffer_views.resize(model->get_vertex_buffers().size());
 	index_buffers.resize(model->get_index_buffers().size());
+	index_buffer_views.resize(model->get_index_buffers().size());
 
 	// TODO Lab: 3.03 Create committed resources for vertex, index and constant buffers on upload heap
 	for (size_t i = 0; i < model->get_index_buffers().size(); i++)
@@ -299,6 +305,11 @@ void cg::renderer::dx12_renderer::load_assets()
 		copy_data(vertex_buffer_data->get_data(),
 				  vertex_buffer_size,
 				  vertex_buffers[i]);
+
+		// TODO Lab: 3.04 Create vertex buffer views
+		vertex_buffer_views[i] = create_vertex_buffer_view(
+				vertex_buffers[i],
+				vertex_buffer_size);
 
 		// Index Buffer
 		auto index_buffer_data = model->get_index_buffers()[i];
@@ -326,7 +337,6 @@ void cg::renderer::dx12_renderer::load_assets()
 	THROW_IF_FAILED(constant_buffer->Map(0, &read_range,
 										 reinterpret_cast<void**>(&constant_buffer_data_begin)));
 
-	// TODO Lab: 3.04 Create vertex buffer views
 	// TODO Lab: 3.04 Create index buffer views
 
 	// TODO Lab: 3.04 Create a constant buffer view
